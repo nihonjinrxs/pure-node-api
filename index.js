@@ -2,14 +2,19 @@
  * Primary file for the API, kicks everything else off
  */
 
-// Dependencies
+// Node Dependencies
 const http = require('http');
+const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const util = require('util');
+const fs = require('fs');
 
-// The server responds to all requests with a string.
-const server = http.createServer((req, res) => {
+// App Dependencies
+const config = require('./config');
+
+// All the server logic for both http and https server
+const processRequest = (req, res) => {
   const startTime = Date.now();
 
   // Get URL and parse it.
@@ -62,13 +67,7 @@ const server = http.createServer((req, res) => {
       console.log(`Received ${method} request for path: ${trimmedPath} with query parameters: ${util.inspect(queryObject)}, with headers ${util.inspect(headers)}, and with request payload: '${buffer}'\nResponded in ${elapsed}ms with status ${statusCode} and response payload: '${payloadString}`);
     });
   });
-});
-
-// Start the server and have it listen on a port (default 3000).
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-  console.log(`The server is listening on port ${port}.`);
-});
+};
 
 // Define request handlers
 const handlers = {
@@ -92,3 +91,20 @@ const handlers = {
 const router = {
   sample: handlers.sample
 }
+
+// Instatiate servers for HTTP and HTTPS.
+const httpServer = http.createServer(processRequest);
+
+const httpsServerOptions = {
+  key: fs.readFileSync(config.httpsKeyFilePath),
+  cert: fs.readFileSync(config.httpsCertFilePath)
+};
+const httpsServer = https.createServer(httpsServerOptions, processRequest);
+
+// Start the servers and have them listen on their respective ports.
+httpServer.listen(config.httpPort, () => {
+  console.log(`The HTTP server is listening on port ${config.httpPort} in ${config.envName} mode.`);
+});
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`The HTTPS server is listening on port ${config.httpsPort} in ${config.envName} mode.`);
+});
