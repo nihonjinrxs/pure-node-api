@@ -82,6 +82,21 @@ const handlers = {
     // Callback an http status code and a payload object
     callback(status, payload);
   },
+  ping: (_data, callback) => {
+    callback(200);
+  },
+  hello: (data, callback) => {
+    let message = "Hello and welcome to the API! Hope you're having a great day!";
+    if (data.payload && data.headers && data.headers.hasOwnProperty('content-type')) {
+      if (data.headers['content-type'] === 'application/json') {
+        const parsedData = JSON.parse(data.payload);
+        if (parsedData.hasOwnProperty('name')) {
+          message = `Hello, ${parsedData.name}, and welcome to the API! Hope you're having a great day!`;
+        }
+      }
+    }
+    callback(200, { message: message });
+  },
   notFound: (_data, callback) => {
     callback(404);
   }
@@ -89,8 +104,10 @@ const handlers = {
 
 // Define a request router
 const router = {
-  sample: handlers.sample
-}
+  sample: handlers.sample,
+  ping:   handlers.ping,
+  hello:  handlers.hello
+};
 
 // Instatiate servers for HTTP and HTTPS.
 const httpServer = http.createServer(processRequest);
