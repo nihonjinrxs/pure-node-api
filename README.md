@@ -2,7 +2,7 @@
 
 This project is a RESTful API built only using Node.js core libraries, with no external package dependencies.
 
-This was built as an assignment for the [Pirple NodeJS Master Class]().
+This was built as an assignment for the [Pirple NodeJS Master Class](https://pirple.thinkific.com/courses/the-nodejs-master-class).
 
 ## Requirements
 
